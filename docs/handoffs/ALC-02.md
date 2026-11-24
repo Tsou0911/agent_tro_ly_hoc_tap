@@ -1,0 +1,31 @@
+# ALC-02 - Smoke PostgreSQL/Qdrant/FastEmbed va build UI
+
+- Agent / ngay / trang thai: GitHub Copilot / 24/11/2026 / DONE
+- Base SHA, branch, worktree / commit hoac duong diff: Khong co Git metadata (`fatal: not a git repository`). Khong co worktree rieng.
+- Pham vi da kiem tra va tệp thay doi: Chi tao phieu ban giao nay. Khong sua code hoac cau hinh runtime; cai FastEmbed vao moi truong Python hien tai de xac minh runtime.
+- Tieu chi nghiem thu:
+  - Docker engine da san sang.
+  - PostgreSQL va Qdrant Compose da khoi dong thanh cong.
+  - `init-db` va `seed-demo` da chay lai thanh cong.
+  - FastEmbed multilingual-e5-small da tai va ingest 2 chunk thanh cong.
+  - Collection `course_chunks` co 2 points, vector 384 chieu, cosine.
+  - Live retrieval tra syllabus va material dung `english101`.
+  - API `/health` tra HTTP 200 voi database connected.
+- Kiem thu:
+  - Backend offline: `92 passed`, exit 0, 92/92.
+  - Frontend API: `5 passed`, exit 0, 5/5.
+  - TypeScript: `npm.cmd run lint -- --incremental false`, exit 0.
+  - Next build: `npm.cmd run build`, exit 0; trang `/` va `/not-found` compile va prerender thanh cong.
+  - Docker: `docker info --format '{{json .ServerVersion}}'` tra 29.9.3.
+  - Compose: postgres healthy; qdrant running.
+  - Qdrant: `/healthz` tra `healthz check passed`; collection points_count=2.
+  - Init/seed: lệnh success va rerun seed không ghi lỗi.
+  - Ingest: `Indexed 2 chunks`.
+  - Retrieval live: syllabus `english-demo-syllabus-1` va material `english-demo-directions-1`, ca hai thuộc `english101`.
+  - `/health`: HTTP 200, `{"status":"ok","database":"connected"}`.
+- Loi hoac ca chua kiem chung:
+  - Git: checkout hien tai khong phai repository Git; khong xac dinh duoc branch/base SHA/diff.
+  - Chua bat Gemini live va chua chay browser E2E. Pham vi nay khong goi Gemini live.
+  - Env fastembed warning tren Windows ve symlink; model van cache va truy xuat thanh cong.
+- Quyet dinh can duyet: Khong co blocker hạ tang cho smoke ALC-02. Cac ca live Gemini/browser thuoc task tiep theo va can phê duyet quota/quyen rieng.
+- Dependency tiep theo: ALC-02 da du dependency va da dat tong quat. ALC-06 hoac ALC-07 moi tiep tuc browser/live evaluation khi du dieu kien; owner Codex review va cap nhat trang thai chung sau review.

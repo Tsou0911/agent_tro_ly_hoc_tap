@@ -1,0 +1,34 @@
+
+Trợ lý học tập cá nhân: Trợ lý học tập AI đồng hành theo chu trình Plan-Do-Reflect
+Mô tả bài toán
+📍 Thực trạng: Sinh viên trường đại học học trên Canvas LMS với nhiều môn, deadline dày đặc; phần lớn chỉ 'chạy theo bài' mà thiếu một người đồng hành giúp lập kế hoạch, theo dõi tiến độ và tự nhìn lại việc học của mình. Trong môi trường đào tạo và nghiên cứu thực tế, dữ liệu học tập và tài liệu học thuật thường phân tán, đa phiên bản và đòi hỏi độ chính xác trích dẫn cũng như chuẩn mực sư phạm rất cao.
+
+🎯 Vấn đề: Bài toán đặt ra là làm thế nào để xây dựng 'learning companion' AI đồng hành từng SV theo chu trình Plan (đặt mục tiêu tuần, chia nhỏ nhiệm vụ từ syllabus/assignment) → Do (nhắc việc, gợi ý tài nguyên môn học có trích nguồn) → Reflect (đối thoại phản tư sau mỗi mốc, tự đánh giá điểm mạnh/yếu), giúp tăng tỷ lệ nộp bài đúng hạn và cải thiện tiến độ; đồng thời kết hợp suy luận đa tác tử với các mô-đun kiểm chứng nguồn học thuật hoặc theo dõi trạng thái năng lực xác định, giúp giải quyết tận gốc điểm nghẽn nhận thức và vận hành mà không làm bài thay người học.
+
+🔒 Ràng buộc: AI chỉ hỗ trợ tư duy và tổ chức việc học, KHÔNG làm hộ bài tập tính điểm (liêm chính học thuật, có cơ chế chống lạm dụng khi SV yêu cầu 'giải giúp'); dữ liệu học tập của SV được phân quyền và ẩn danh khi tổng hợp (FERPA-mindset); gợi ý tài nguyên phải grounded trên tài liệu môn học và có trích nguồn (chống bịa); có HITL để giảng viên xem tổng quan tiến độ lớp; đo được KPI tỷ lệ nộp đúng hạn và mức cải thiện tiến độ; kiểm soát chi phí/độ trễ token cho quy mô 1000 SV dùng đồng thời.
+
+Techstack gợi ý
+• LLM (GPT-4o-mini/Claude Haiku cho tác vụ thường, model lớn cho phản tư)
+• RAG với Qdrant lưu embedding syllabus/tài liệu môn + reranker (bge-reranker/Cohere Rerank)
+• tích hợp Canvas LMS qua REST API + LTI 1.3 để lấy assignment, deadline, submission
+• agent lập kế hoạch bằng LangGraph (planner + reflector node) có memory dài hạn (Postgres)
+• guardrails (NeMo Guardrails/Llama Guard) chặn yêu cầu làm hộ bài
+• eval bằng RAGAS + LLM-as-Judge cho chất lượng phản tư
+• backend FastAPI
+• frontend Next.js (React)
+• deploy Docker + cloud (Render/GCP Cloud Run), caching Redis giảm chi phí.
+• Dữ liệu & benchmark thực tế tham chiếu: Bộ dữ liệu phân tích giáo dục mở EdNet (Riiid), ASSISTments, OULAD (Open University Learning Analytics), khung kỹ năng ESCO / O*NET và chuẩn LMS LTI 1.3.
+
+Yêu cầu đầu ra gợi ý
+Cơ bản:
+• Web app deploy online, đăng nhập ≥2 vai trò (sinh viên/giảng viên)
+• SV tạo mục tiêu tuần, AI chia nhỏ nhiệm vụ từ syllabus và nhắc deadline (đọc từ Canvas hoặc dữ liệu mô phỏng), có phiên phản tư cuối tuần
+• giảng viên xem dashboard tiến độ tổng quan (ẩn danh)
+• metric cơ bản: tỷ lệ nộp đúng hạn trước/sau khi dùng.
+
+Nâng cao:
+• Multi-agent Plan-Do-Reflect với memory cá nhân hóa, tích hợp Canvas LMS thật qua LTI
+• eval pipeline RAGAS đối chiếu KPI (1000 SV đồng thời qua load test, mức cải thiện tiến độ)
+• dashboard giảng viên có cảnh báo SV nguy cơ trễ
+• guardrails liêm chính học thuật + tối ưu chi phí/độ trễ bằng caching và routing model theo độ khó
+• Kết hợp mô-đun kiểm chứng dữ liệu xác định với đánh giá định lượng trên bộ dữ liệu giáo dục/học thuật thực tế, mở rộng các tính năng phân tích chiều sâu hỗ trợ người học và giảng viên.

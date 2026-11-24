@@ -1,0 +1,24 @@
+[
+  {
+    "id": "python-syllabus-1",
+    "course_id": "python101",
+    "resource_id": "python-syllabus",
+    "document_version": "1",
+    "title": "Syllabus Nhập môn Python — dữ liệu minh họa",
+    "source_uri": "local:demo/python-syllabus",
+    "page": 1,
+    "kind": "syllabus",
+    "text": "Môn Nhập môn Python gồm biến, kiểu dữ liệu, cấu trúc điều kiện, vòng lặp for và while, hàm, danh sách và kiểm thử cơ bản. Tuần này sinh viên tự luyện vòng lặp, giải thích điều kiện dừng và tự kiểm tra các trường hợp biên. Mục tiêu là hiểu luồng thực thi và tự viết được chương trình. Trợ lý chỉ giải thích khái niệm và gợi mở phương pháp, không cung cấp bài nộp hoàn chỉnh."
+  },
+  {
+    "id": "python-loops-1",
+    "course_id": "python101",
+    "resource_id": "python-loops",
+    "document_version": "1",
+    "title": "Vòng lặp Python — dữ liệu minh họa",
+    "source_uri": "local:demo/python-loops",
+    "page": 2,
+    "kind": "material",
+    "text": "Vòng lặp for duyệt lần lượt qua các phần tử của một đối tượng có thể lặp. Vòng lặp while tiếp tục thực thi khi điều kiện còn đúng. Khi phân tích vòng lặp, hãy xác định trạng thái ban đầu, điều kiện tiếp tục, cách cập nhật trạng thái và điều kiện dừng. Có thể lập bảng theo dõi giá trị của các biến sau mỗi lượt lặp để tự kiểm tra luồng thực thi."
+  }
+]

@@ -1,0 +1,38 @@
+# Target Python 3.13.
+# Install from the repository root with:
+# python -m pip install -r backend/requirements.txt
+# Versions will be locked after the initial backend is implemented and tested.
+
+# API server, input validation, configuration, and file uploads
+fastapi
+uvicorn[standard]
+pydantic>=2,<3
+pydantic-settings>=2,<3
+python-multipart
+
+# PostgreSQL access and database migrations
+SQLAlchemy>=2.0.48,<2.1
+# Pure Python driver for Windows environments that restrict native DLLs.
+pg8000>=1.31.5,<2
+alembic
+
+# Plan / Do / Reflect workflow and document retrieval
+langgraph>=1,<2
+langchain-core>=1,<2
+# Tested native wheel on Windows; newer wheel is blocked on the development host.
+ormsgpack==1.12.2; platform_system == "Windows"
+qdrant-client>=1.14,<2
+fastembed>=0.7,<1
+pypdf
+# Gemini uses httpx. FastEmbed runs locally.
+
+# Authentication, HTTP requests, and Windows timezone data
+PyJWT[crypto]>=2,<3
+pwdlib[argon2]
+httpx
+tzdata
+
+# Backend unit and integration tests
+pytest
+pytest-asyncio
+pytest-cov

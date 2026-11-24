@@ -1,0 +1,312 @@
+{
+  "schema_version": 1,
+  "cases": [
+    {
+      "id": "plan-a2-directions",
+      "request": {
+        "mode": "plan",
+        "message": "Mục tiêu tiếng Anh trong tuần: Hỏi và chỉ đường trong hội thoại ngắn.\nTrình độ CEFR tự đánh giá: A2\nKỹ năng tập trung: Nói, Từ vựng",
+        "week_start": "2026-11-16",
+        "available_minutes": {
+          "2026-11-16": 20,
+          "2026-11-19": 15
+        }
+      },
+      "source_ids": [
+        "english-demo-directions-1",
+        "english-demo-syllabus-1"
+      ],
+      "mock_draft": {
+        "tasks": [
+          {
+            "text": "Luyện nói: đổi vai hỏi và chỉ đường.",
+            "evidence": [
+              {
+                "chunk_id": "english-demo-directions-1",
+                "quote": "For speaking practice, take turns asking for directions and answering aloud."
+              }
+            ],
+            "day": "2026-11-16",
+            "minutes": 20,
+            "assignment_id": null
+          },
+          {
+            "text": "Ôn lại cụm từ chỉ đường trong một buổi ngắn.",
+            "evidence": [
+              {
+                "chunk_id": "english-demo-syllabus-1",
+                "quote": "Người học chọn kỹ năng theo mục tiêu và trình độ tự khai báo, chia nội dung thành các buổi ngắn trong quỹ thời gian rảnh."
+              }
+            ],
+            "day": "2026-11-19",
+            "minutes": 10,
+            "assignment_id": null
+          }
+        ]
+      },
+      "expected": {
+        "status": "ok",
+        "citation_ids": [
+          "english-demo-directions-1",
+          "english-demo-syllabus-1"
+        ],
+        "text_contains": [
+          "Luyện nói",
+          "cụm từ chỉ đường"
+        ],
+        "schedule_minutes": {
+          "2026-11-16": 20,
+          "2026-11-19": 10
+        },
+        "saved_task_count": 0
+      }
+    },
+    {
+      "id": "plan-reject-total-over-budget",
+      "request": {
+        "mode": "plan",
+        "message": "Mục tiêu tiếng Anh trong tuần: Hỏi và chỉ đường trong hội thoại ngắn.\nTrình độ CEFR tự đánh giá: A2\nKỹ năng tập trung: Nói, Từ vựng",
+        "week_start": "2026-11-16",
+        "available_minutes": {
+          "2026-11-16": 20,
+          "2026-11-19": 15
+        }
+      },
+      "source_ids": [
+        "english-demo-directions-1",
+        "english-demo-syllabus-1"
+      ],
+      "mock_draft": {
+        "tasks": [
+          {
+            "text": "Luyện nói: đổi vai hỏi và chỉ đường.",
+            "evidence": [
+              {
+                "chunk_id": "english-demo-directions-1",
+                "quote": "For speaking practice, take turns asking for directions and answering aloud."
+              }
+            ],
+            "day": "2026-11-16",
+            "minutes": 20,
+            "assignment_id": null
+          },
+          {
+            "text": "Ôn lại cụm từ chỉ đường trong một buổi ngắn.",
+            "evidence": [
+              {
+                "chunk_id": "english-demo-syllabus-1",
+                "quote": "Người học chọn kỹ năng theo mục tiêu và trình độ tự khai báo, chia nội dung thành các buổi ngắn trong quỹ thời gian rảnh."
+              }
+            ],
+            "day": "2026-11-16",
+            "minutes": 10,
+            "assignment_id": null
+          }
+        ]
+      },
+      "expected": {
+        "status": "insufficient_evidence",
+        "citation_ids": [],
+        "text_excludes": [
+          "Luyện nói: đổi vai"
+        ],
+        "schedule_minutes": {},
+        "saved_task_count": 0,
+        "feedback_contains": [
+          "Daily time budget exceeded"
+        ]
+      }
+    },
+    {
+      "id": "do-a2-speaking-exercise",
+      "request": {
+        "mode": "do",
+        "message": "A2, tôi muốn luyện nói: hỏi đường trong một đoạn hội thoại ngắn để tự luyện.",
+        "week_start": "2026-11-16"
+      },
+      "source_ids": [
+        "english-demo-directions-1"
+      ],
+      "mock_draft": {
+        "statements": [
+          {
+            "text": "Đổi vai với bạn luyện. Hỏi đường tới thư viện, sau đó tự trả lời thành tiếng bằng hai bước chỉ đường.",
+            "evidence": [
+              {
+                "chunk_id": "english-demo-directions-1",
+                "quote": "For speaking practice, take turns asking for directions and answering aloud."
+              }
+            ]
+          }
+        ]
+      },
+      "expected": {
+        "status": "ok",
+        "citation_ids": [
+          "english-demo-directions-1"
+        ],
+        "text_contains": [
+          "Đổi vai",
+          "Hỏi đường",
+          "tự trả lời"
+        ],
+        "text_excludes": [
+          "Go straight past the clock shop."
+        ]
+      }
+    },
+    {
+      "id": "do-writing-feedback",
+      "request": {
+        "mode": "do",
+        "message": "Tôi viết: At the blue bench, left. Hãy gợi ý để tôi tự sửa câu chỉ đường.",
+        "week_start": "2026-11-16"
+      },
+      "source_ids": [
+        "english-demo-directions-1"
+      ],
+      "mock_draft": {
+        "statements": [
+          {
+            "text": "Câu chỉ đường có thể bắt đầu bằng động từ. Bạn sẽ đặt động từ chỉ hành động nào ở đầu câu?",
+            "evidence": [
+              {
+                "chunk_id": "english-demo-directions-1",
+                "quote": "To give directions, start with a verb:"
+              }
+            ]
+          }
+        ]
+      },
+      "expected": {
+        "status": "ok",
+        "citation_ids": [
+          "english-demo-directions-1"
+        ],
+        "text_contains": [
+          "bắt đầu bằng động từ",
+          "Bạn sẽ đặt động từ",
+          "?"
+        ],
+        "text_excludes": [
+          "Turn left at the blue bench."
+        ]
+      }
+    },
+    {
+      "id": "do-forged-source",
+      "request": {
+        "mode": "do",
+        "message": "Cho tôi cách hỏi đường theo học liệu.",
+        "week_start": "2026-11-16"
+      },
+      "source_ids": [
+        "english-demo-directions-1"
+      ],
+      "mock_draft": {
+        "statements": [
+          {
+            "text": "Có thể bắt đầu bằng lời chào bí mật.",
+            "evidence": [
+              {
+                "chunk_id": "invented-english-guide",
+                "quote": "Chào bí mật."
+              }
+            ]
+          }
+        ]
+      },
+      "expected": {
+        "status": "insufficient_evidence",
+        "citation_ids": [],
+        "text_excludes": [
+          "bí mật",
+          "invented-english-guide"
+        ],
+        "feedback_contains": [
+          "Unknown source or quote not found in source"
+        ]
+      }
+    },
+    {
+      "id": "do-no-material",
+      "request": {
+        "mode": "do",
+        "message": "Tôi có thể tra cách hỏi đường ở trang nào?",
+        "week_start": "2026-11-16"
+      },
+      "source_ids": [],
+      "expected": {
+        "status": "insufficient_evidence",
+        "citation_ids": [],
+        "text_contains": [
+          "chưa có đủ căn cứ"
+        ],
+        "model_calls": 0
+      }
+    },
+    {
+      "id": "do-graded-essay",
+      "request": {
+        "mode": "do",
+        "message": "Write my graded English essay for me.",
+        "week_start": "2026-11-16"
+      },
+      "source_ids": [],
+      "expected": {
+        "status": "academic_refusal",
+        "citation_ids": [],
+        "text_contains": [
+          "không thể làm hộ",
+          "nêu cách đã thử"
+        ],
+        "model_calls": 0
+      }
+    },
+    {
+      "id": "reflect-next-week",
+      "request": {
+        "mode": "reflect",
+        "message": "Tôi đã luyện nói nhưng còn ngập ngừng khi chỉ đường. Tuần sau tôi có 20 phút.",
+        "week_start": "2026-11-16"
+      },
+      "source_ids": [
+        "english-demo-syllabus-1"
+      ],
+      "mock_draft": {
+        "questions": [
+          {
+            "text": "Với 20 phút tuần sau, bạn muốn chia thành hai lượt 10 phút để luyện nói vào những ngày nào?",
+            "evidence": [
+              {
+                "chunk_id": "english-demo-syllabus-1",
+                "quote": "Cuối tuần, ghi lại kỹ năng đã luyện, việc đã hoàn thành, khó khăn và điều chỉnh quỹ phút cho tuần sau."
+              }
+            ]
+          }
+        ],
+        "memory": [
+          {
+            "observation": "Còn ngập ngừng khi chỉ đường.",
+            "student_quote": "còn ngập ngừng khi chỉ đường"
+          }
+        ]
+      },
+      "expected": {
+        "status": "ok",
+        "citation_ids": [
+          "english-demo-syllabus-1"
+        ],
+        "text_contains": [
+          "20 phút",
+          "hai lượt 10 phút",
+          "?"
+        ],
+        "memory_approved": false,
+        "memory_observations": [
+          "Còn ngập ngừng khi chỉ đường."
+        ]
+      }
+    }
+  ]
+}
