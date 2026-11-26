@@ -1,244 +1,92 @@
-# AI Learning Companion — Tự học tiếng Anh theo Plan–Do–Reflect
+# LinguaCompanion
 
-Ứng dụng giúp một người học đặt mục tiêu tiếng Anh, lập lịch theo quỹ thời gian,
-tự luyện và nhìn lại tiến độ mỗi tuần. Giao diện Next.js dùng FastAPI và hỗ trợ
-đăng nhập demo với học phần `english101`. Backend dùng Gemini Developer API với
-model mặc định `gemini-3.5-flash-lite`. [Cấu hình Gemini](backend/README.md#gemini-và-free-tier)
+LinguaCompanion là ứng dụng học ngoại ngữ theo chu trình **Plan → Do → Reflect**. Giáo viên lập lớp, giao mục tiêu và tài liệu. Sinh viên tham gia qua mã hoặc QR, lập kế hoạch tuần, luyện kỹ năng, hỏi gia sư theo tài liệu và xem tiến độ tính từ hoạt động thực tế.
 
-## 1. Tổng quan
+## 1. Mở ứng dụng trên máy
 
-1. **PLAN.** Nhập mục tiêu, trình độ CEFR nếu muốn, kỹ năng ưu tiên và số phút
-   rảnh mỗi ngày. Xem, sửa và duyệt từng nhiệm vụ có thời lượng dự kiến.
-2. **DO.** Cập nhật trạng thái nhiệm vụ, yêu cầu bài luyện để tự làm hoặc xin gợi
-   ý sửa bài nháp. Phản hồi dựa trên học liệu có nguồn và báo rõ khi thiếu căn cứ.
-   Trợ lý hướng dẫn người học tự làm bài tính điểm.
-3. **REFLECT.** Xem nhiệm vụ đã tự đánh dấu, ghi lại kỹ năng đã luyện, khó khăn và
-   thời gian tuần sau. Người học xác nhận ghi chú muốn dùng cho kế hoạch tiếp theo.
+Cài Node.js 22 trở lên cùng npm. Từ thư mục chứa `package.json`, chạy các lệnh PowerShell sau. Trên macOS/Linux, dùng `cp .env.example .env.local` cho bước sao chép.
 
-Chạy test và build theo hướng dẫn backend. Chế độ demo có dữ liệu học liệu tổng
-hợp. Nhiệm vụ hiển thị trong phiên đang mở và số phút trên giao diện là thời lượng
-dự kiến. [Chạy và kiểm thử](backend/README.md) · [Đánh giá offline](eval/README.md) · [Kiến trúc hiện tại](docs/MULTI_AGENT.md)
-
-Các mục từ phần 2 lưu thiết kế MVP ban đầu để tham chiếu khi đọc kiến trúc và
-lộ trình.
-
-### Người dùng
-
-- **Người học:** quản lý mục tiêu tiếng Anh, nhiệm vụ, lịch học, tiến độ và phản tư.
-- **Giảng viên:** xem thông tin tiến độ tổng hợp theo lớp/môn; xem xét các cảnh báo cần can thiệp theo chính sách phân quyền.
-
-### Giá trị khác biệt
-
-- Không chỉ tạo to-do list: kế hoạch được cập nhật từ tiến độ thực tế và kết quả Reflect.
-- Hỗ trợ học thuật có **trích dẫn đến đúng tài liệu học phần**, đồng thời nêu rõ khi thiếu căn cứ.
-- Kết quả học tập, hạn nộp và KPI được tính bằng **code xác định** thay vì để LLM tự suy diễn số liệu.
-- Đặt **liêm chính học thuật, quyền riêng tư và human-in-the-loop (HITL)** làm ràng buộc thiết kế.
-
-## 2. Phạm vi MVP (cá nhân, dự kiến 6–8 tuần)
-
-| Mã | Tính năng MVP | Tiêu chí hoàn thành |
-|---|---|---|
-| M1 | Đăng nhập 2 vai trò | Student/Instructor, endpoint có kiểm tra phân quyền |
-| M2 | Nhập học phần và assignment | CSV/JSON hoặc nhập thủ công, PDF syllabus có kiểm tra kết quả trích xuất |
-| M3 | PLAN | Sinh kế hoạch tuần theo deadline, quỹ thời gian và ưu tiên; người học duyệt/sửa |
-| M4 | DO | Theo dõi trạng thái task và luyện theo học liệu có trích nguồn |
-| M5 | REFLECT | Phiên phản tư cuối tuần, người học xác nhận nội dung trước khi lưu memory |
-| M6 | Dashboard | Tiến độ tổng hợp, tỷ lệ nộp đúng hạn tính bằng code; không tiết lộ dữ liệu cá nhân |
-| M7 | Safety + Evaluation | Bộ test chống làm hộ, test grounding, permission tests, KPI và log chi phí/độ trễ |
-
-**Chiến lược cá nhân:** ưu tiên một luồng chạy được trước; chia công việc thành các chặng nhỏ, mỗi chặng có test và commit. Vai trò giảng viên trong MVP có thể dùng tài khoản demo cùng dữ liệu tổng hợp giả lập.
-
-**Chưa thuộc MVP:** Canvas LTI 1.3 tích hợp thật, gửi push/email tự động, dự đoán rủi ro bằng ML, multi-agent độc lập quy mô lớn, load test 1.000 người dùng đồng thời trên production. Những mục này là hướng mở rộng cần kiểm chứng.
-
-## 3. User flow chính
-
-Một người học tự đánh giá trình độ A2, muốn hỏi và chỉ đường trong hội thoại ngắn.
-Họ nhập 20 phút rảnh thứ Hai và 15 phút thứ Năm. Sau khi duyệt các nhiệm vụ dự
-kiến, họ luyện đổi vai theo học liệu, xin gợi ý cho một câu chỉ đường đã viết và
-đánh dấu những nhiệm vụ đã hoàn thành. Cuối tuần, họ ghi lại điểm còn vướng và cân
-nhắc chia 20 phút tuần sau thành hai lượt luyện nói ngắn.
-
-## 4. Kiến trúc đề xuất
-
-```mermaid
-flowchart TD
-    U[Student / Instructor] --> FE[Next.js Web App]
-    FE --> API[FastAPI API]
-    API --> AUTH[Auth + RBAC]
-    API --> DB[(PostgreSQL)]
-    API --> WF[LangGraph Workflow]
-    API --> KPI[Deterministic KPI Service]
-    API --> ING[Ingestion + Canvas Adapter]
-    ING --> DB
-    ING --> IDX[Chunking / Embeddings]
-    IDX --> VDB[(Qdrant)]
-    WF --> P[PLAN Node]
-    WF --> D[DO Node + RAG]
-    WF --> R[REFLECT Node]
-    D --> VDB
-    WF --> G[Academic Integrity + Grounding Gate]
-    WF --> DB
-    API --> CACHE[(Redis - optional MVP)]
-    KPI --> DB
+```powershell
+npm ci
+Copy-Item .env.example .env.local
+npm run dev
 ```
 
-**Nguyên tắc:** Plan, Do và Reflect là **node trong một workflow có state chung** ở MVP; không nhất thiết phải là ba agent chạy tự trị. Hành động có tác động (đổi deadline, lưu mục tiêu, gửi nhắc việc) cần được xác nhận và kiểm tra quyền.
+Mở [trang chủ](http://localhost:3000). Bạn có thể lật thẻ hội thoại và nghe phát âm trước khi cấu hình dịch vụ. Để dùng tài khoản và lớp học, hoàn tất phần Supabase bên dưới. Khởi động lại Next.js sau khi sửa `.env.local`.
 
-### Tech stack
+## 2. Tạo dự án Supabase
 
-| Thành phần | Công nghệ dự kiến |
-|---|---|
-| Frontend | Next.js, React, TypeScript |
-| Backend | Python, FastAPI, Pydantic |
-| Workflow | LangGraph |
-| LLM | Model nhỏ cho tác vụ thường, routing theo nhu cầu |
-| RAG | Qdrant, embedding model, reranker (giai đoạn nâng cao) |
-| Database | PostgreSQL |
-| Cache/queue | Redis (sau khi xác định điểm nghẽn) |
-| Ingestion | PDF parser, CSV/JSON, Canvas REST adapter tùy chọn |
-| Deploy | Docker Compose cho demo; cloud là phần triển khai tiếp |
-| Test/Eval | pytest, bộ tình huống gắn nhãn, RAG evaluation, load testing |
+1. Tạo một project **Free** trong Supabase. Mở **SQL Editor → New query**, dán toàn bộ nội dung [supabase/schema.sql](supabase/schema.sql) và chạy một lần trên project mới. Script tạo các bảng, khóa ngoại, trigger, RLS, RPC và bucket riêng `materials` trong một giao dịch.
+2. Mở **Connect** hoặc **Project Settings → API Keys**, lấy URL dự án, khóa public/anon và khóa secret/service_role. Điền vào `.env.local` theo bảng bên dưới.
+3. Trong **Authentication**, bật đăng nhập bằng email và mật khẩu. Đặt **Site URL** thành `http://localhost:3000` và thêm `http://localhost:3000/auth/callback**` vào **Redirect URLs**. Khi bật xác nhận email, mở liên kết xác nhận bằng trình duyệt dùng để đăng ký.
+4. Tạo một tài khoản **Giáo viên** và một tài khoản **Sinh viên** để thử cả hai vai trò. Trigger tạo hồ sơ từ dữ liệu đăng ký. Mỗi giáo viên chỉ quản lý lớp do mình tạo.
 
-## 5. Mô hình dữ liệu mức khái niệm
+| Biến | Giá trị |
+| --- | --- |
+| `NEXT_PUBLIC_SUPABASE_URL` | URL HTTPS của project |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Publishable key hoặc legacy anon key |
+| `SUPABASE_SERVICE_ROLE_KEY` | Secret key hoặc legacy service_role, chỉ đặt trên máy chủ |
+| `LLM_BASE_URL` | Endpoint OpenAI-compatible của 9Router, gồm đuôi `/v1` |
+| `LLM_API_KEY` | API key ứng dụng được cấp tại 9Router |
+| `MODEL_FAST` | Danh sách model/combo cho luyện tập và hội thoại |
+| `MODEL_SMART` | Danh sách cho hỏi đáp theo tài liệu, hỗ trợ trả JSON |
+| `MODEL_VISION` | Danh sách model/combo nhận ảnh, để trống để dùng OCR |
 
-- `users(id, role, pseudonym, created_at)`
-- `courses(id, code, title, instructor_id)`
-- `enrollments(user_id, course_id)`
-- `learning_resources(id, course_id, title, version, source_uri, checksum, uploaded_at)`
-- `assignments(id, course_id, title, due_at_utc, source_resource_id)`
-- `submissions(id, assignment_id, user_id, submitted_at_utc, status, verified_source)`
-- `weekly_goals(id, user_id, week_start, goal_text, available_minutes, status)`
-- `study_tasks(id, user_id, assignment_id, goal_id, title, estimated_minutes, due_at_utc, status)`
-- `reflections(id, user_id, week_start, answers_json, user_approved_at)`
-- `competency_states(id, user_id, course_id, skill_key, self_rating, evidence_ref, updated_at)`
-- `audit_logs(id, actor_id, action, resource_type, resource_id, timestamp)`
+Các client trình duyệt và máy chủ dùng cookie qua `@supabase/ssr`. RLS và policy của Storage kiểm soát dữ liệu theo lớp. [Tài liệu Supabase SSR](https://supabase.com/docs/guides/auth/server-side/creating-a-client)
 
-Dữ liệu cá nhân và nội dung phản tư không được đưa vào dashboard tổng hợp nếu không có chính sách rõ ràng. Thiết lập giới hạn kích thước nhóm trước khi công bố số liệu để tránh nhận diện gián tiếp.
+## 3. Chạy 9Router với model miễn phí
 
-## 6. Nguồn dữ liệu
+Mở một terminal riêng trên máy chạy model router.
 
-### MVP
-
-- Syllabus PDF do người triển khai chuẩn bị hoặc được phép sử dụng.
-- Assignment CSV/JSON giả lập có timestamp và trạng thái thực hiện.
-- Tài liệu môn học được phép tải lên, có metadata: môn, phiên bản, trang, checksum.
-
-### Mở rộng
-
-- **Canvas REST API:** lấy course/assignment/submission theo quyền được cấp; cần cơ chế đồng bộ, xử lý timezone, phân trang, rate limit.
-- **LTI 1.3:** cần đăng ký tích hợp/ủy quyền tại đơn vị vận hành Canvas; không giả định API key/LTI access đã có.
-- **OULAD, EdNet, ASSISTments:** dùng nghiên cứu phân tích hành vi/năng lực; **không tương đương** dữ liệu deadline/submission của Canvas. Phải lập bảng ánh xạ schema, license và giới hạn đánh giá.
-
-## 7. RAG có nguồn và quản lý phiên bản
-
-Pipeline: `Upload → parse → validate metadata → chunk theo cấu trúc → embed → index → retrieve → (rerank) → cite → answer`.
-
-Mỗi chunk phải mang `course_id`, `resource_id`, `document_version`, `page/section`, `source_uri`. Truy xuất phải lọc theo **quyền của người hỏi** và môn học. Nếu không có bằng chứng hỗ trợ, AI từ chối khẳng định thay vì tạo trích dẫn giả. Khi tài liệu được cập nhật, đánh dấu phiên bản cũ và cập nhật index có kiểm soát.
-
-## 8. Quy tắc AI và an toàn
-
-1. **Không làm hộ bài tính điểm:** không tạo bài nộp hoàn chỉnh hoặc lời giải cuối cùng cho assignment đang được chấm. Có thể giải thích khái niệm, hướng dẫn cách suy nghĩ, đặt câu hỏi gợi mở, dùng ví dụ tương tự và nhận xét bài nháp của người học theo chính sách môn học.
-2. **Grounded answers:** với khẳng định về học liệu phải chỉ rõ tài liệu và vị trí; nếu không đủ bằng chứng thì nêu giới hạn.
-3. **RBAC/RLS:** sinh viên chỉ đọc dữ liệu được cấp phép; giảng viên chỉ xem lớp phụ trách và thông tin cần thiết.
-4. **Privacy:** dữ liệu phản tư là nhạy cảm theo ngữ cảnh, cần hạn chế quyền, giữ tối thiểu, có thời hạn lưu và chức năng xóa/xuất nếu áp dụng.
-5. **HITL:** người học duyệt kế hoạch và memory; giảng viên xác minh cảnh báo trước khi hành động, không coi dự báo là kết luận về cá nhân.
-6. **Prompt injection:** coi nội dung tài liệu và tin nhắn tải lên là dữ liệu không đáng tin; không cho phép thay đổi policy, gọi tool hoặc vượt quyền.
-7. **Determinism:** tính toán số nộp bài, ngày hạn, tỷ lệ đúng hạn, chi phí và thời gian bằng code, có phép thử đối chiếu.
-
-## 9. KPI & cách đánh giá
-
-### KPI sản phẩm
-
-- **Tỷ lệ nộp đúng hạn** = số assignment có `submitted_at <= due_at` / số assignment đến hạn hợp lệ trong kỳ. Chỉ tính khi có dữ liệu submission đáng tin cậy; phân biệt chưa nộp và chưa có dữ liệu.
-- **Task completion rate** = task đã hoàn thành / task đã đến hạn trong kỳ.
-- **Plan adherence** = task hoàn thành đúng mốc kế hoạch / task được lên lịch (cần thống nhất quy tắc reschedule).
-- **Reflection completion** = tuần có Reflect được người học xác nhận / tuần đủ điều kiện đo.
-
-Không tuyên bố “cải thiện trước/sau” chỉ nhờ dữ liệu giả lập. Để đánh giá tác động, cần theo dõi nhóm người dùng qua thời gian, có baseline thích hợp, xem xét yếu tố gây nhiễu và báo cáo kích thước mẫu.
-
-### KPI AI / hệ thống
-
-- Citation support rate / groundedness trên bộ câu hỏi có đáp án và nguồn chuẩn.
-- Academic-integrity compliance trên tình huống thường, tình huống biên, yêu cầu làm hộ và jailbreak.
-- Permission leakage rate = 0 trong bộ test truy cập chéo.
-- Latency p50/p95; tokens/request; chi phí/request, cache-hit rate (nếu dùng cache).
-- Load test tăng dần; **1.000 concurrent users là mục tiêu nâng cao chưa được xác nhận**.
-
-## 10. Cấu trúc repository đề xuất
-
-```text
-ai-learning-companion/
-├── README.md
-├── GUIDE.md
-├── .env.example
-├── docker-compose.yml
-├── backend/
-│   ├── app/
-│   │   ├── api/
-│   │   ├── auth/
-│   │   ├── agents/          # plan, do, reflect + shared state
-│   │   ├── rag/
-│   │   ├── services/        # deadlines, submissions, KPI
-│   │   ├── models/
-│   │   └── main.py
-│   ├── tests/
-│   └── requirements.txt
-├── frontend/
-│   ├── app/
-│   └── package.json
-├── data/
-│   └── samples/             # chỉ dữ liệu tổng hợp/được phép
-├── eval/
-│   ├── fixtures/
-│   └── reports/
-└── docs/
-    ├── architecture.md
-    ├── data-contracts.md
-    └── threat-model.md
+```sh
+npm install -g 9router
+9router
 ```
 
-> Cấu trúc trên là **đề xuất**; các đường dẫn chỉ sử dụng được sau khi người phát triển khởi tạo code tương ứng.
+1. Mở [dashboard 9Router](http://localhost:20128). Trong **Providers**, kết nối nhà cung cấp có hạn mức miễn phí của bạn và thử model trong dashboard.
+2. Trong **Combos**, tạo `lingua-fast` cho phản hồi nhanh, `lingua-smart` cho câu trả lời JSON và `lingua-vision` nếu bạn có model nhận ảnh. Chỉ đưa model thuộc gói miễn phí vào danh sách. Có thể điền trực tiếp ID mà dashboard hiển thị thay cho tên combo.
+3. Tạo API key cho ứng dụng tại 9Router. Điền key vào `LLM_API_KEY`. Giữ `LLM_BASE_URL=http://localhost:20128/v1` khi chạy Next.js và 9Router trên cùng máy.
+4. Phân cách các combo bằng dấu phẩy, ví dụ `MODEL_SMART=lingua-smart,lingua-fast`. Khi gặp HTTP 429 hoặc 503, ứng dụng thử mục tiếp theo. Nếu toàn bộ model vision hết lượt, trình duyệt dùng Tesseract để đọc chữ trong ảnh rồi gửi phần chữ cho gia sư.
 
-## 11. Chạy dự án (sau khi có code)
+9Router dùng thông tin kết nối do bạn cấu hình. Hạn mức và model miễn phí thay đổi theo nhà cung cấp. [Hướng dẫn 9Router](https://github.com/decolua/9router)
 
-Các lệnh dưới đây là **quy ước triển khai dự kiến**, không phải cam kết repository hiện đã chạy được:
+## 4. Thử một vòng học
 
-```bash
-# 1. Clone repository cá nhân
-# git clone <REPOSITORY_URL>
-# cd ai-learning-companion
+1. **Giáo viên** tạo lớp và Aim, ví dụ hoàn thành hai bài nghe và đạt ít nhất 70/100 ở một bài kiểm tra. Tải lên DOCX hoặc PDF có lớp văn bản, tối đa 4 MiB mỗi tệp. Đề kiểm tra hỗ trợ trắc nghiệm, trả lời ngắn và tự luận.
+2. **Sinh viên** mở liên kết mời hoặc nhập mã sáu ký tự. Trang sinh viên hỗ trợ quét QR bằng camera hoặc ảnh. Ghi kế hoạch tuần rồi thử hỏi gia sư bằng một cụm từ xuất hiện trong tài liệu. Mỗi phần trả lời kiến thức có nhãn dạng `[Nguồn: bai-hoc.pdf - Đoạn 2]`.
+3. Vào **Luyện tập** để nghe, hội thoại hoặc viết. Micro và camera cần localhost hoặc HTTPS cùng quyền truy cập thiết bị. Khả năng nhận giọng nói và giọng đọc phụ thuộc trình duyệt. OCR tải dữ liệu ngôn ngữ về trình duyệt ở lần dùng đầu.
+4. Làm bài kiểm tra rồi xem điểm. Câu khách quan được chấm bằng khóa đáp án. Bài có tự luận chờ giáo viên duyệt điểm cuối. Quay lại trang tuần học để ghi điều làm tốt, điểm cần cải thiện và việc sẽ làm tuần tới.
+5. Giáo viên xem tiến độ từng sinh viên và xử lý câu hỏi trong hộp thư. Các chỉ tiêu Aim lấy dữ liệu trong khoảng ngày theo múi giờ Việt Nam. Mỗi chỉ tiêu có trọng số bằng nhau và dừng ở 100%. Chỉ bài đã chấm đạt ngưỡng mới được tính vào số bài đạt.
 
-# 2. Tạo cấu hình từ ví dụ nếu chưa có
-test -e .env || cp .env.example .env
+**Dữ liệu mẫu.** Điền `SEED_TEACHER_EMAIL` và `SEED_TEACHER_PASSWORD` của một tài khoản giáo viên đã xác nhận trong `.env.local`, rồi chạy `npm run seed`. Script tạo lớp **English Café**, một Aim và một tài liệu hội thoại, sau đó in mã tham gia. Chạy lại với cùng tài khoản sẽ dùng lại bộ dữ liệu đó.
 
-# 3. Điền các biến môi trường được cấp (không commit .env)
-# 4. Sau khi cấu hình Docker Compose hoàn chỉnh:
-docker compose up --build
+## 5. Đưa ứng dụng lên Vercel và nối tới máy cá nhân
 
-# 5. Sau khi backend có health endpoint:
-# http://localhost:8000/health
-# http://localhost:3000
+1. Import repository vào Vercel, chọn preset **Next.js** và một phiên bản Node.js từ 22 trở lên. Thêm các biến Supabase và model trong **Settings → Environment Variables**. Chọn Hobby nếu dự án thuộc phạm vi sử dụng của gói.
+2. Trên máy cá nhân, đặt mật khẩu quản trị riêng cho dashboard 9Router và bật yêu cầu API key (`REQUIRE_API_KEY=true`). Kiểm tra rằng truy cập `/v1/models` thiếu khóa bị từ chối trước khi mở tunnel. Cài `cloudflared` rồi chạy lệnh sau trong một terminal riêng.
+
+   ```sh
+   cloudflared tunnel --url http://localhost:20128
+   ```
+
+3. Lấy URL HTTPS do terminal in ra. Ví dụ nếu URL là `https://example.trycloudflare.com`, đặt **LLM_BASE_URL** trên Vercel thành `https://example.trycloudflare.com/v1`. Đặt **LLM_API_KEY** đúng bằng khóa đã cấp cho ứng dụng. Redeploy để áp dụng biến môi trường.
+4. Trong Supabase Auth, dùng URL HTTPS của web làm **Site URL** và thêm `https://<ten-web>.vercel.app/auth/callback**` vào danh sách redirect. Giữ cả 9Router và cloudflared chạy trong thời gian cần dùng AI.
+
+Quick Tunnel phù hợp cho buổi thử. Địa chỉ có thể đổi khi khởi động lại, lúc đó cần cập nhật Vercel. Cloudflare cấp URL cho toàn bộ dịch vụ trên cổng 20128, kể cả dashboard. Với địa chỉ ổn định, dùng named tunnel và cấu hình ingress chỉ cho các đường dẫn API cần thiết. [Cloudflare Quick Tunnels](https://developers.cloudflare.com/tunnel/get-started/quick-tunnels/)
+
+Có thể vận hành trong hạn mức miễn phí của Supabase, Vercel và nhà cung cấp model đã chọn. Khi hết hạn mức, ứng dụng báo lỗi hoặc chuyển sang model miễn phí tiếp theo. [Supabase Free](https://supabase.com/docs/guides/platform/billing-on-supabase) · [Vercel Hobby](https://vercel.com/docs/plans/hobby)
+
+## 6. Kiểm tra và khắc phục
+
+```sh
+npm run typecheck
+npm run build
+npm start
 ```
 
-Cấu hình backend hiện tại gồm `DATABASE_URL`, `QDRANT_URL`, `GEMINI_API_KEY`,
-`GEMINI_MODEL`, `JWT_SECRET` và `APP_ENV`. Giữ key thật trong cấu hình local.
+- `GET /api/health` trả `{"status":"ok","service":"LinguaCompanion"}` khi máy chủ Next.js đang chạy. Để thử kết nối đầu cuối, đăng nhập, mở lớp có tài liệu rồi gửi một câu hỏi.
+- **Thiếu hồ sơ sau đăng ký.** Kiểm tra SQL Editor đã báo thành công và tài khoản đã xác nhận email. Schema cũng khởi tạo hồ sơ cho người dùng có sẵn khi cài lần đầu.
+- **Gia sư chưa tìm được nguồn.** Thử cụm từ xuất hiện trong tài liệu đúng lớp. Tệp PDF chỉ chứa ảnh cần chuyển sang PDF có thể chọn văn bản hoặc DOCX trước khi tải.
+- **Router không phản hồi.** Kiểm tra endpoint có đuôi `/v1`, khóa API và tên combo đúng trên dashboard. Nếu dùng tunnel, kiểm tra URL hiện tại sau mỗi lần khởi động lại.
 
-## 12. Definition of Done (MVP)
-
-- [ ] Có thể demo một user flow từ nhập assignment → Plan → Do → Reflect → điều chỉnh tuần sau.
-- [ ] Có đăng nhập, phân quyền sinh viên/giảng viên và unit/integration tests cơ bản.
-- [ ] RAG cung cấp nguồn đúng, có xử lý không tìm được bằng chứng.
-- [ ] Guardrails chống làm hộ và kiểm tra đầu vào tài liệu không đáng tin.
-- [ ] Dashboard không lộ thông tin người học; KPI tính từ dữ liệu có thể kiểm toán.
-- [ ] Có ít nhất 5 test case end-to-end kèm đầu vào, kết quả thực tế và kỳ vọng.
-- [ ] Có tài liệu setup, video demo và báo cáo hạn chế chưa triển khai.
-
-## 13. Tài liệu liên quan
-
-Xem [trạng thái đã kiểm chứng](docs/PROJECT_STATUS.md), [kiến trúc hiện tại](docs/ARCHITECTURE.md) và [roadmap ba Agent](docs/TASKS.md) để tiếp tục phát triển.
-
-Xem [`GUIDE.md`](./GUIDE.md) để biết lộ trình thực hiện cá nhân, mốc nghiệm thu theo giai đoạn và bộ test gợi ý.
-
-## 14. Tuyên bố phạm vi & đạo đức
-
-Sản phẩm là công cụ **hỗ trợ người học tự chủ**, không thay thế giảng viên hoặc hệ thống chấm điểm. Việc triển khai trên dữ liệu sinh viên thực phải tuân thủ chính sách đơn vị đào tạo, quy định bảo vệ dữ liệu áp dụng và nguyên tắc tương tự FERPA; **không mặc nhiên khẳng định tuân thủ FERPA** chỉ nhờ ẩn danh.
+Xem [AGENTS.md](AGENTS.md) để biết danh mục bảng, quy ước và các nguyên tắc kiểm chứng khi phát triển tiếp.
